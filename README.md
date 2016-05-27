@@ -1,6 +1,6 @@
 # nick_toy_car
 
-ROS based, PS3 joystick controller toy car.
+ROS based, PS3 joystick controlled toy car.
 
 ## Used
 - Ubuntu 14.04.2 LTS
