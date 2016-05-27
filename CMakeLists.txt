@@ -7,6 +7,7 @@ project(nick_toy_car)
 find_package(catkin REQUIRED COMPONENTS
   joy
   rospy
+  roslaunch
 )
 
 ## System dependencies are found with CMake's conventions
@@ -172,6 +173,7 @@ include_directories(
 #   # myfile2
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
+roslaunch_add_file_check(main.launch)
 
 #############
 ## Testing ##

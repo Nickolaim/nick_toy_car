@@ -1,0 +1,3 @@
+<launch>
+    <node name="sixad" pkg="nick_toy_car" type="sixad.py"/>
+</launch>
