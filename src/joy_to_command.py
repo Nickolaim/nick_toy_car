@@ -18,6 +18,8 @@ def button_index_to_command(argument):
         3: "S",
         4: "F",
         6: "B",
+        8: "-",
+        9: "+",
     }
     return switcher.get(argument, "")
 
