@@ -30,7 +30,7 @@ def joystick_x_y_to_motor_coef(x, y):
     v = 0. if y == 0 else cos(atan(x/y))
     if x >= 0:
         left = v
-        right = 1.
+        right = 0. if x == 0 else 1.
     else:
         left = 1.
         right = v
