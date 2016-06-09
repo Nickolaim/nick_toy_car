@@ -15,11 +15,8 @@ pub = rospy.Publisher('car_command', String, queue_size=10)
 
 def button_index_to_command(argument):
     switcher = {
-        3: "S",
-        4: "F",
-        6: "B",
-        8: "-",
-        9: "+",
+        8: "D",
+        9: "U",
     }
     return switcher.get(argument, "")
 
@@ -35,6 +32,9 @@ def callback(joy_message):
             cmd = button_index_to_command(i)
             if cmd != "":
                 command += cmd + " "
+
+    command += "LX" + str(joy_message.axes[0])
+    command += " LY" + str(joy_message.axes[1])
 
     if command != "":
         pub.publish(command)
