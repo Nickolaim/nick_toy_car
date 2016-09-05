@@ -35,6 +35,23 @@ def joystick_axes_to_command(axis0, axis1):
     return stop_command() if degree is None else move_command(degree)
 
 
+def command_to_motor_coef(cmd):
+    """
+    Convert MOVE command into two coefficients - for left and right motors.
+    If a coefficient is negatives - motor is going to reverse
+    :param cmd: Move command with degree, e.g. MOVE45
+    :return: left and right coefficients for [0..1] for the motors
+    """
+    if cmd == stop_command() or not cmd.startswith(move_command()):
+        return 0., 0.
+    degree = float(cmd[len(move_command()):])
+    if degree > 90 or degree < -90:
+        return 0., 0.
+    left_coef = (-degree + 90.) / 180.
+    right_coef = (degree + 90.) / 180.
+    return left_coef, right_coef
+
+
 def stop_command():
     """
     :return: the command for stop

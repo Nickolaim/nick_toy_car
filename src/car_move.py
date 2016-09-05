@@ -1,11 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from Adafruit_MotorHAT import Adafruit_MotorHAT
 import atexit
+from math import cos
 
-from math import cos, atan, pi
 import rospy
+from Adafruit_MotorHAT import Adafruit_MotorHAT
 from std_msgs.msg import String
+
+from joy_to_command_translation import speed_increase_command, speed_decrease_command, command_to_motor_coef
 
 maxValueForSpeed = 128  # 255 is the max speed, but it is 12V, too much for the current motor
 mh = Adafruit_MotorHAT(addr=0x60)
@@ -26,8 +28,8 @@ atexit.register(turnOffMotors)
 leftMotor = mh.getMotor(3)
 rightMotor = mh.getMotor(4)
 
-def joystick_x_y_to_motor_coef(x, y):
-    v = 0. if y == 0 else cos(atan(x/y))
+def joystick_x_y_to_motor_coef(degree):
+    c1 = cos(degree)
     if x >= 0:
         left = v
         right = 0. if x == 0 else 1.
@@ -42,23 +44,20 @@ def joystick_x_y_to_motor_coef(x, y):
     return left, right
 
 
-def on_command(command):
+def on_command(commandline):
     """
-    :type command: String
+    :type commandline: String
     """
-    commands = command.data.split()
+    commands = commandline.data.to_upper.split()
     left_joy_x = left_joy_y = 0.
+    left_motor_coef = right_motor_coef = 0.
     for data in commands:
-        if "U" in data:
+        if speed_increase_command() in data:
             speed_update(min(speed + speedStep, maxValueForSpeed))
-        elif "D" in data:
+        elif speed_decrease_command() in data:
             speed_update(max(speed - speedStep, speedStep))
-        elif "LX" in data:
-            left_joy_x = float(data[2:])
-        elif "LY" in data:
-            left_joy_y = float(data[2:])
-
-    left_motor_coef, right_motor_coef = joystick_x_y_to_motor_coef(left_joy_x, left_joy_y)
+        else:
+            left_motor_coef, right_motor_coef = command_to_motor_coef(data)
 
     left_motor_speed = int(abs(left_motor_coef) * maxValueForSpeed)
     if left_motor_speed <= 1:
@@ -74,7 +73,7 @@ def on_command(command):
         rightMotor.setSpeed(right_motor_speed)
         rightMotor.run(Adafruit_MotorHAT.FORWARD if right_motor_coef > 0 else Adafruit_MotorHAT.BACKWARD)
 
-#    print("Left: speed" + str(left_motor_speed) + ", coef:" + str(left_motor_coef) + "Right: speed" + str(right_motor_speed) + ", right:" + str(right_motor_coef) + "joystick: " + str(left_joy_x) + "," + str(left_joy_y))
+    print("Left: speed" + str(left_motor_speed) + ", coef:" + str(left_motor_coef) + "Right: speed" + str(right_motor_speed) + ", right:" + str(right_motor_coef) + "joystick: " + str(left_joy_x) + "," + str(left_joy_y))
 
 
 def speed_update(speed_update_lambda):
