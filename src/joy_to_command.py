@@ -1,30 +1,28 @@
 #!/usr/bin/env python
 
 """ This node translates joystick input into commands for the car.
-Car commands are just stings, case insensitive.  Multiple command can appear in one string.  Space separated.
-List of commands:
-F: move forward
-B: move backward
+Car commands are case insensitive strings.  Multiple command can appear in one string.  Space separated.
 """
 
-from std_msgs.msg import String
-from sensor_msgs.msg import Joy
 import rospy
+from sensor_msgs.msg import Joy
+from std_msgs.msg import String
+
+from joy_to_command_translation import speed_increase_command, speed_decrease_command, joystick_axes_to_command
 
 pub = rospy.Publisher('car_command', String, queue_size=10)
 
 def button_index_to_command(argument):
     switcher = {
-        8: "D",
-        9: "U",
+        8: speed_decrease_command(),
+        9: speed_increase_command(),
     }
     return switcher.get(argument, "")
 
 
 def callback(joy_message):
     """
- 
-    :type joy_message: Joy
+     :type joy_message: message from joystick
     """
     command = ""
     for i in range(len(joy_message.buttons)):
@@ -33,8 +31,7 @@ def callback(joy_message):
             if cmd != "":
                 command += cmd + " "
 
-    command += "LX" + str(joy_message.axes[0])
-    command += " LY" + str(joy_message.axes[1])
+    command += joystick_axes_to_command(joy_message.axes[0], joy_message.axes[1])
 
     if command != "":
         pub.publish(command)
